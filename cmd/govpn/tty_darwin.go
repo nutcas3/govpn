@@ -1,4 +1,4 @@
-//go:build linux
+//go:build darwin
 
 package main
 
@@ -13,7 +13,7 @@ func isTerminal() bool {
 	_, _, errno := syscall.Syscall(
 		syscall.SYS_IOCTL,
 		os.Stderr.Fd(),
-		syscall.TCGETS,
+		syscall.TIOCGETA,
 		uintptr(unsafe.Pointer(&t)),
 	)
 	return errno == 0
