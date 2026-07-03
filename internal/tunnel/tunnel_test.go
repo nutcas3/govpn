@@ -12,8 +12,6 @@ import (
 	"github.com/govpn/govpn/internal/tunnel"
 )
 
-// ── mock device ───────────────────────────────────────────────────────────────
-
 type mockDevice struct {
 	mtu      int
 	outgoing chan []byte
@@ -53,8 +51,6 @@ func (m *mockDevice) recv(d time.Duration) ([]byte, bool) {
 		return nil, false
 	}
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 func freeAddr(t *testing.T) string {
 	t.Helper()
@@ -119,8 +115,6 @@ func newPair(t *testing.T, passphrase string) (srv, cli *tunnel.Tunnel, srvDev, 
 
 	return srv, cli, srvDev, cliDev
 }
-
-// ── tests ─────────────────────────────────────────────────────────────────────
 
 func TestClientToServer(t *testing.T) {
 	t.Parallel()

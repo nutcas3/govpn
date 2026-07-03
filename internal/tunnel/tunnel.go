@@ -199,8 +199,6 @@ func (t *Tunnel) Send(pkt []byte) error {
 	return t.sendData(pkt)
 }
 
-// ── pumps ─────────────────────────────────────────────────────────────────────
-
 func (t *Tunnel) pumpTUNtoUDP(ctx context.Context) error {
 	buf := make([]byte, t.dev.MTU()+64)
 	for {
@@ -340,8 +338,6 @@ func (t *Tunnel) keepaliveLoop(ctx context.Context) {
 		}
 	}
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 func buildFrame(ft byte, payload []byte) []byte {
 	frame := make([]byte, 3+len(payload))

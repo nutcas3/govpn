@@ -59,14 +59,12 @@ func runClient(args []string) {
 func runNode(cfg *config.Config) {
 	printBanner(cfg)
 
-	// ── slog logger ───────────────────────────────────────────────────────────
 	logLevel := slog.LevelWarn
 	if cfg.Verbose {
 		logLevel = slog.LevelDebug
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
 
-	// ── build node ────────────────────────────────────────────────────────────
 	section("Initializing")
 
 	sp := newSpinner("Building VPN node…")
@@ -86,7 +84,6 @@ func runNode(cfg *config.Config) {
 
 	printNodeInfo(cfg, node.InterfaceName())
 
-	// ── run ───────────────────────────────────────────────────────────────────
 	section("Running")
 	logOK("Tunnel is up  " + dim("(Ctrl-C to stop)"))
 	fmt.Fprintln(os.Stderr)
@@ -106,8 +103,6 @@ func runNode(cfg *config.Config) {
 	fmt.Fprintln(os.Stderr)
 	printSessionSummary(node.Stats())
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 func loadAndCheck(path string, want config.Mode) *config.Config {
 	sp := newSpinner(fmt.Sprintf("Loading %s", path))
