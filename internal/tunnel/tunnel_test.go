@@ -3,117 +3,30 @@ package tunnel_test
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"net"
 	"testing"
 	"time"
 
 	"github.com/govpn/govpn/internal/cipher"
 	"github.com/govpn/govpn/internal/tunnel"
+	"github.com/govpn/govpn/pkg/testutil"
 )
 
-type mockDevice struct {
-	mtu      int
-	outgoing chan []byte
-	incoming chan []byte
-}
+type mockDevice = testutil.MockDevice
 
 func newMockDevice(mtu int) *mockDevice {
-	return &mockDevice{
-		mtu:      mtu,
-		outgoing: make(chan []byte, 64),
-		incoming: make(chan []byte, 64),
-	}
-}
-
-func (m *mockDevice) Name() string { return "mock0" }
-func (m *mockDevice) MTU() int     { return m.mtu }
-func (m *mockDevice) Close() error { return nil }
-
-func (m *mockDevice) ReadPacket(buf []byte) ([]byte, error) {
-	pkt := <-m.outgoing
-	n := copy(buf, pkt)
-	return buf[:n], nil
-}
-
-func (m *mockDevice) WritePacket(pkt []byte) error {
-	cp := make([]byte, len(pkt))
-	copy(cp, pkt)
-	m.incoming <- cp
-	return nil
+	return testutil.NewMockDevice(mtu)
 }
 
 func (m *mockDevice) recv(d time.Duration) ([]byte, bool) {
-	select {
-	case pkt := <-m.incoming:
-		return pkt, true
-	case <-time.After(d):
-		return nil, false
-	}
+	return testutil.MockDevice(*m).recv(d)
+}
+
+func newPair(t *testing.T, passphrase string) (srv, cli *tunnel.Tunnel, srvDev, cliDev *mockDevice) {
+	return testutil.NewPair(t, passphrase)
 }
 
 func freeAddr(t *testing.T) string {
-	t.Helper()
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
-	if err != nil {
-		t.Fatal(err)
-	}
-	port := conn.LocalAddr().(*net.UDPAddr).Port
-	conn.Close()
-	return fmt.Sprintf("127.0.0.1:%d", port)
-}
-
-// newPair creates a matched server+client tunnel pair and starts both.
-// The client sends an initial packet so the server registers the client address
-// before any test assertion runs.
-func newPair(t *testing.T, passphrase string) (srv, cli *tunnel.Tunnel, srvDev, cliDev *mockDevice) {
-	t.Helper()
-
-	c, err := cipher.NewFromPassphrase(passphrase)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	addr := freeAddr(t)
-	srvDev = newMockDevice(1400)
-	cliDev = newMockDevice(1400)
-
-	opts := tunnel.Options{KeepaliveInterval: 5 * time.Second}
-
-	srv, err = tunnel.NewServer(addr, c, srvDev, opts)
-	if err != nil {
-		t.Fatalf("NewServer: %v", err)
-	}
-
-	cli, err = tunnel.NewClient(addr, c, cliDev, opts)
-	if err != nil {
-		t.Fatalf("NewClient: %v", err)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(func() {
-		cancel()
-		srv.Close()
-		cli.Close()
-	})
-
-	go srv.Run(ctx) //nolint:errcheck
-	go cli.Run(ctx) //nolint:errcheck
-
-	// Send a registration packet from client so the server learns the client
-	// UDP address (the PING is enough, but we also drain it from srvDev).
-	// Allow time for the goroutines to start and the PING to arrive.
-	time.Sleep(150 * time.Millisecond)
-
-	// Register client addr explicitly by sending a data packet.
-	regPkt := []byte{0x45, 0x00}
-	if err := cli.Send(regPkt); err != nil {
-		t.Fatalf("registration packet: %v", err)
-	}
-	// Drain it so test assertions start clean.
-	srvDev.recv(500 * time.Millisecond)
-
-	return srv, cli, srvDev, cliDev
+	return testutil.FreeAddr(t)
 }
 
 func TestClientToServer(t *testing.T) {
