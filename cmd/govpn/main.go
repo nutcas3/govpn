@@ -40,7 +40,7 @@ func main() {
 	case "help", "--help", "-help", "-h":
 		usage()
 	default:
-		fmt.Fprintf(os.Stderr, "%s: unknown command %q\n\n", progname(), cmd)
+		fmt.Fprint(os.Stderr, progname()+": unknown command "+fmt.Sprintf("%q", cmd)+"\n\n")
 		usage()
 		os.Exit(2)
 	}
@@ -48,26 +48,26 @@ func main() {
 
 func usage() {
 	w := os.Stderr
-	fmt.Fprintf(w, "%s  %s\n\n", bold("govpn"), dim("— a minimal cross-platform VPN"))
-	fmt.Fprintf(w, "%s\n", dim("Usage:"))
-	fmt.Fprintf(w, "  govpn <command> [flags]\n\n")
-	fmt.Fprintf(w, "%s\n", dim("Commands:"))
-	printCmd("server",  "Start a VPN server node")
-	printCmd("client",  "Connect to a VPN server")
-	printCmd("init",    "Generate a config file interactively")
+	fmt.Fprint(w, bold("govpn")+"  "+dim("— a minimal cross-platform VPN")+"\n\n")
+	fmt.Fprint(w, dim("Usage:")+"\n")
+	fmt.Fprint(w, "  govpn <command> [flags]\n\n")
+	fmt.Fprint(w, dim("Commands:")+"\n")
+	printCmd("server", "Start a VPN server node")
+	printCmd("client", "Connect to a VPN server")
+	printCmd("init", "Generate a config file interactively")
 	printCmd("version", "Print version and build info")
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "%s\n", dim("Examples:"))
-	fmt.Fprintf(w, "  govpn init --mode server --out server.json\n")
-	fmt.Fprintf(w, "  govpn init --mode client --out client.json\n")
-	fmt.Fprintf(w, "  sudo govpn server --config server.json\n")
-	fmt.Fprintf(w, "  sudo govpn client --config client.json\n")
+	fmt.Fprint(w, dim("Examples:")+"\n")
+	fmt.Fprint(w, "  govpn init --mode server --out server.json\n")
+	fmt.Fprint(w, "  govpn init --mode client --out client.json\n")
+	fmt.Fprint(w, "  sudo govpn server --config server.json\n")
+	fmt.Fprint(w, "  sudo govpn client --config client.json\n")
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "%s\n", dim("Run 'govpn <command> --help' for command-specific flags."))
+	fmt.Fprint(w, dim("Run 'govpn <command> --help' for command-specific flags.")+"\n")
 }
 
 func printCmd(name, desc string) {
-	fmt.Fprintf(os.Stderr, "  %-10s %s\n", bold(name), desc)
+	fmt.Fprint(os.Stderr, "  "+bold(name)+"  "+desc+"\n")
 }
 
 func progname() string { return "govpn" }

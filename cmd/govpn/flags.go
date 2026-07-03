@@ -12,10 +12,10 @@ func newFlagSet(name, description string) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "%s — %s\n\n", bold("govpn "+name), description)
-		fmt.Fprintf(os.Stderr, "%s\n", dim("Usage:"))
-		fmt.Fprintf(os.Stderr, "  govpn %s [flags]\n\n", name)
-		fmt.Fprintf(os.Stderr, "%s\n", dim("Flags:"))
+		fmt.Fprint(os.Stderr, bold("govpn "+name)+" — "+description+"\n\n")
+		fmt.Fprint(os.Stderr, dim("Usage:")+"\n")
+		fmt.Fprint(os.Stderr, "  govpn "+name+" [flags]\n\n")
+		fmt.Fprint(os.Stderr, dim("Flags:")+"\n")
 		fs.PrintDefaults()
 		fmt.Fprintln(os.Stderr)
 	}
@@ -27,6 +27,6 @@ func newFlagSet(name, description string) *flag.FlagSet {
 func mustParse(fs *flag.FlagSet, args []string) {
 	if err := fs.Parse(args); err != nil {
 		fs.Usage()
-		fatal("%v", err)
+		fatal(fmt.Sprintf("%v", err))
 	}
 }
