@@ -62,7 +62,7 @@ func NewPair(t *testing.T, passphrase string) (srv, cli *tunnel.Tunnel, srvDev, 
 	if err := cli.Send(regPkt); err != nil {
 		t.Fatalf("registration packet: %v", err)
 	}
-	srvDev.recv(500 * time.Millisecond)
+	srvDev.Recv(500 * time.Millisecond)
 
 	return srv, cli, srvDev, cliDev
 }
