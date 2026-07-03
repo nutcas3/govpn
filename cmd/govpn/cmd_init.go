@@ -42,14 +42,14 @@ func runInit(args []string) {
 	}
 
 	sp := newSpinner(fmt.Sprintf("Writing %s", *out))
-	sp.start()
+	sp.Start()
 
 	if err := os.WriteFile(*out, data, 0o600); err != nil {
-		sp.finish(false, "Write failed")
+		sp.Finish(false, "Write failed")
 		fatal(fmt.Sprintf("%v", err))
 	}
 
-	sp.finish(true, fmt.Sprintf("Config written to %s", bold(*out)))
+	sp.Finish(true, fmt.Sprintf("Config written to %s", bold(*out)))
 	fmt.Fprintln(os.Stderr)
 
 	printTable([][2]string{
