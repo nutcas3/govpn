@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -68,11 +69,11 @@ func runNode(cfg *config.Config) {
 	section("Initializing")
 
 	sp := newSpinner("Building VPN node…")
-	sp.start()
+	sp.Start()
 
 	node, err := vpn.New(cfg, logger)
 	if err != nil {
-		sp.finish(false, "Initialization failed")
+		sp.Finish(false, "Initialization failed")
 		logErr(fmt.Sprintf("%v", err))
 		if isPermissionErr(err) {
 			logWarn("Hint: run with sudo (Linux/macOS) or as Administrator (Windows)")
@@ -80,7 +81,7 @@ func runNode(cfg *config.Config) {
 		os.Exit(1)
 	}
 
-	sp.finish(true, fmt.Sprintf("Interface %s  %s", bold(node.InterfaceName()), cyan(cfg.LocalIP)))
+	sp.Finish(true, fmt.Sprintf("Interface %s  %s", bold(node.InterfaceName()), cyan(cfg.LocalIP)))
 
 	printNodeInfo(cfg, node.InterfaceName())
 
@@ -106,20 +107,20 @@ func runNode(cfg *config.Config) {
 
 func loadAndCheck(path string, want config.Mode) *config.Config {
 	sp := newSpinner(fmt.Sprintf("Loading %s", path))
-	sp.start()
+	sp.Start()
 
 	cfg, err := config.Load(path)
 	if err != nil {
-		sp.finish(false, "Config error")
+		sp.Finish(false, "Config error")
 		fatal(fmt.Sprintf("%v", err))
 	}
 
 	if cfg.Mode != want {
-		sp.finish(false, "Wrong config mode")
+		sp.Finish(false, "Wrong config mode")
 		fatal(fmt.Sprintf("config mode is %q — use 'govpn %s' for that mode", cfg.Mode, cfg.Mode))
 	}
 
-	sp.finish(true, fmt.Sprintf("Config loaded  %s", dim(path)))
+	sp.Finish(true, fmt.Sprintf("Config loaded  %s", dim(path)))
 	return cfg
 }
 
@@ -191,20 +192,7 @@ func isPermissionErr(err error) bool {
 		return false
 	}
 	msg := err.Error()
-	return contains(msg, "permission denied") ||
-		contains(msg, "operation not permitted") ||
-		contains(msg, "Access is denied")
-}
-
-func contains(s, sub string) bool {
-	return len(s) >= len(sub) && (s == sub || len(s) > 0 && containsRune(s, sub))
-}
-
-func containsRune(s, sub string) bool {
-	for i := range s {
-		if i+len(sub) <= len(s) && s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(msg, "permission denied") ||
+		strings.Contains(msg, "operation not permitted") ||
+		strings.Contains(msg, "Access is denied")
 }
