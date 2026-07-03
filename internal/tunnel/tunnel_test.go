@@ -11,18 +11,21 @@ import (
 	"github.com/govpn/govpn/pkg/testutil"
 )
 
-type mockDevice = testutil.MockDevice
+type mockDevice struct {
+	*testutil.MockDevice
+}
 
 func newMockDevice(mtu int) *mockDevice {
-	return testutil.NewMockDevice(mtu)
+	return &mockDevice{MockDevice: testutil.NewMockDevice(mtu)}
 }
 
 func (m *mockDevice) recv(d time.Duration) ([]byte, bool) {
-	return testutil.MockDevice(*m).recv(d)
+	return m.MockDevice.Recv(d)
 }
 
 func newPair(t *testing.T, passphrase string) (srv, cli *tunnel.Tunnel, srvDev, cliDev *mockDevice) {
-	return testutil.NewPair(t, passphrase)
+	srvT, cliT, srvDevT, cliDevT := testutil.NewPair(t, passphrase)
+	return srvT, cliT, &mockDevice{MockDevice: srvDevT}, &mockDevice{MockDevice: cliDevT}
 }
 
 func freeAddr(t *testing.T) string {

@@ -37,7 +37,7 @@ func (m *MockDevice) WritePacket(pkt []byte) error {
 	return nil
 }
 
-func (m *MockDevice) recv(d time.Duration) ([]byte, bool) {
+func (m *MockDevice) Recv(d time.Duration) ([]byte, bool) {
 	select {
 	case pkt := <-m.incoming:
 		return pkt, true
