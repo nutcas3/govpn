@@ -1,0 +1,14 @@
+{
+  "mode": "client",
+  "server_addr": "YOUR_SERVER_IP:1194",
+  "tun_name": "govpn0",
+  "local_ip": "10.8.0.2/24",
+  "peer_ip": "10.8.0.1",
+  "routes": [
+    "10.8.0.0/24"
+  ],
+  "passphrase": "change-me-to-something-strong",
+  "mtu": 1400,
+  "keepalive_interval": "15s",
+  "verbose": false
+}
